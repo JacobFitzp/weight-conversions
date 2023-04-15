@@ -18,9 +18,10 @@ abstract class AbstractUnit
      *
      * @var float|int
      */
-    protected float $amountInKilograms = 0;
+    public float|int $amountInKilograms = 0;
+    protected false|int $roundingPrecision = false;
 
-    public function __construct(protected float $amount = 0)
+    public function __construct(protected int|float $amount = 0)
     {
         $this->calculateAmountInKilograms();
     }
@@ -28,10 +29,18 @@ abstract class AbstractUnit
     /**
      * Get weight amount for this unit
      *
-     * @return float
+     * @return int|float
      */
-    public function getAmount(): float
+    public function amount(): int|float
     {
+        // With rounding
+        if (is_int($this->roundingPrecision)) {
+            return round(
+                $this->amount,
+                $this->roundingPrecision
+            );
+        }
+
         return $this->amount;
     }
 
@@ -62,6 +71,28 @@ abstract class AbstractUnit
     }
 
     /**
+     * Round the amount
+     *
+     * @param false|int $precision
+     * @return $this
+     */
+    public function round(false|int $precision = 1): AbstractUnit
+    {
+        $this->roundingPrecision = $precision;
+
+        return $this;
+    }
+
+    /**
+     * Get a formatted human-readable version of the amount
+     * For example "23KG", "12st 5"
+     *
+     * @param string $format
+     * @return string
+     */
+    abstract public function formatted(string $format = ''): string;
+
+    /**
      * Calculate the amount in kilograms.
      * This is used as the basis for all conversions
      *
@@ -69,6 +100,6 @@ abstract class AbstractUnit
      */
     protected function calculateAmountInKilograms(): void
     {
-        $this->amountInKilograms = self::RELATIVE_TO_KG * $this->amount;
+        $this->amountInKilograms = $this->amount() / $this::RELATIVE_TO_KG;
     }
 }

@@ -6,6 +6,17 @@
 
 Simple PHP package to convert between different units of weight measurement.
 
+Supports gram, kilogram, milligram, ounce, pound, stone and ton... and can easily be extended to add additional units.
+
+```php
+echo (new Pound(27.8))
+    ->to(Kilogram::class)
+    ->round()
+    ->formatted()
+
+// 12.6kg
+```
+
 ## Installation
 
 You can install the package via composer:
@@ -28,33 +39,34 @@ $kilograms->setAmount(5.75);
 $ounce = $kilograms->to(Ounce::class);
 
 // Get weight amount
-$ounce->getAmount();
+$ounce->amount();
+
+// Round the amount
+// Defaults to a precision of 1 decimal place
+$ounce->round();
+
+// Get a formatted human-readable version of the amount
+// For example "2kgG", "12st 5" 
+$ounce->formatted();
 ```
 
-Supported measurement units:
+### Extending 
+
+You can create your own units of measurement by extending the `AbstractUnit` class:
 
 ```php
-// Gram
-\JacobFitzp\WeightConversions\Units\Gram::class;
-
-// Kilogram
-\JacobFitzp\WeightConversions\Units\Kilogram::class;
-
-// Milligram
-\JacobFitzp\WeightConversions\Units\Milligram::class;
-
-// Ounce
-\JacobFitzp\WeightConversions\Units\Ounce::class;
-
-// Pound
-\JacobFitzp\WeightConversions\Units\Pound::class;
-
-// Stone
-\JacobFitzp\WeightConversions\Units\Stone::class;
-
-// Ton
-\JacobFitzp\WeightConversions\Units\Ton::class;
+class Hobnobs extends AbstractUnit
+{
+    public const RELATIVE_TO_KG = 50;
+    
+    public function formatted(string $format = '%s hobnobs'): string
+    {
+        return sprintf($format, $this->amount());
+    }
+}
 ```
+
+Let's break down how this works... The main thing to be aware of is the `RELATIVE_TO_KG` constant, this represents the amount of the unit that is relative to 1kg - For exampe, above we are saying that 50 hobnobs = 1kg. This is used as the basis for all conversion calculations.
 
 ## Testing
 
